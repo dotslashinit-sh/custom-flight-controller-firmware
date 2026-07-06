@@ -20,6 +20,7 @@
 #include "main.h"
 #include "cmsis_os.h"
 #include "cmsis_os2.h"
+#include "projdefs.h"
 #include "stm32f4xx_hal_i2c.h"
 #include "usb_device.h"
 
@@ -319,11 +320,14 @@ void SensorTask(void*) {
   
 
   uint8_t check = 0;
+  vTaskDelay(pdMS_TO_TICKS(1));
   HAL_I2C_Mem_Read(&hi2c1, SENSOR_ADDRESS, WHO_AM_I, I2C_MEMADD_SIZE_8BIT, &check, 1, 1000);
+  
+  
 
-  if(check != 0x68) {
+  if(check != 0x70) {
     LogMessage("Sensor was not detected!");
-    return;
+    //return;
   }
 
   // Sensor initialize
@@ -335,8 +339,8 @@ void SensorTask(void*) {
   while(1) {
     HAL_I2C_Mem_Read(&hi2c1, SENSOR_ADDRESS, MEM_START_ADDRESS, I2C_MEMADD_SIZE_8BIT, (uint8_t*)(&data), 14, 1000);
     PopulateRealValues(&data);
-    ApplyMadgwickFilter(&data);
-    snprintf(dataMsg, sizeof(dataMsg), "Gyro Roll: %.4f Pitch: %.4f Yaw: %.4f Temp: %.4f\r\n", data.roll, data.pitch, data.yaw, data.temp);
+    //ApplyMadgwickFilter(&data);
+    snprintf(dataMsg, sizeof(dataMsg), "Gyro Roll: %.4f Pitch: %.4f Yaw: %.4f Temp: %.4f\r\n", data.gyro_x, data.gyro_y, data.gyro_z, data.temp);
     LogMessage(dataMsg);
     // snprintf(dataMsg, sizeof(dataMsg), "Gyro Roll: %f Pitch: %f Yaw: %f \n", data.roll, data.pitch, data.yaw);
     // LogMessage(dataMsg);
